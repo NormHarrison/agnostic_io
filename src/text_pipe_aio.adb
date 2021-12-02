@@ -9,7 +9,7 @@ package body Text_Pipe_AIO is
       Data    : in     String)
    is
    begin
-      Ada.Text_IO.Put_Line (Data);
+      Ada.Text_IO.Put_Line (Channel.Output_Pipe, Data);
    end Write_Line;
 
    overriding function Read_Line
