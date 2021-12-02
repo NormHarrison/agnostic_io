@@ -1,0 +1,92 @@
+V "GNAT Lib v10"
+A -gnatA
+A -gnatwa
+A -gnatwe
+A -mtune=generic
+A -march=x86-64
+P ZX
+
+RN
+RV NO_DISPATCHING_CALLS
+RV NO_IO
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_DYNAMIC_SIZED_OBJECTS
+RV NO_IMPLEMENTATION_PRAGMAS
+RV NO_ELABORATION_CODE
+RV SPARK_05
+
+U text_pipe_io%b	text_pipe_io.adb	44b3a5d5 OO PK
+Z ada.tags%s		a-tags.adb		a-tags.ali
+
+U text_pipe_io%s	text_pipe_io.ads	defabd67 EE OO PF PK
+W ada%s			ada.ads			ada.ali
+Z ada.tags%s		a-tags.adb		a-tags.ali
+W ada.text_io%s		a-textio.adb		a-textio.ali
+W agnostic_io%s		agnostic_io.ads		agnostic_io.ali
+Z system%s		system.ads		system.ali
+Z system.soft_links%s	s-soflin.adb		s-soflin.ali
+
+D ada.ads		20200723063517 76789da1 ada%s
+D a-except.ads		20200723063517 a7106115 ada.exceptions%s
+D a-ioexce.ads		20200723063517 e4a01f64 ada.io_exceptions%s
+D a-stream.ads		20200723063517 119b8fb3 ada.streams%s
+D a-tags.ads		20200723063517 491b781d ada.tags%s
+D a-textio.ads		20200723063517 aef4d56d ada.text_io%s
+D a-unccon.ads		20200723063517 0e9b276f ada.unchecked_conversion%s
+D agnostic_io.ads	20211202013640 2f6f4b46 agnostic_io%s
+D interfac.ads		20200723063517 5ab55268 interfaces%s
+D i-cstrea.ads		20200723063517 e53d8b8e interfaces.c_streams%s
+D system.ads		20200723063517 4635ec04 system%s
+D s-crtl.ads		20200723063517 0ebbdb71 system.crtl%s
+D s-exctab.ads		20200723063517 54135002 system.exception_table%s
+D s-ficobl.ads		20200723063517 078245e4 system.file_control_block%s
+D s-parame.ads		20200723063517 48ec542b system.parameters%s
+D s-secsta.ads		20200723063517 20bbe636 system.secondary_stack%s
+D s-soflin.ads		20200723063517 a7318a92 system.soft_links%s
+D s-stache.ads		20200723063517 a37c21ec system.stack_checking%s
+D s-stalib.ads		20200723063517 09bd3940 system.standard_library%s
+D s-stoele.ads		20200723063517 2dc34a04 system.storage_elements%s
+D s-stoele.adb		20200723063517 ed88f8fb system.storage_elements%b
+D s-traent.ads		20200723063517 005bf670 system.traceback_entries%s
+D s-unstyp.ads		20200723063517 34867c83 system.unsigned_types%s
+D s-wchcon.ads		20200723063517 1b7d22d2 system.wch_con%s
+D text_pipe_io.ads	20211202013847 5f61234c text_pipe_io%s
+D text_pipe_io.adb	20211128181655 1bd28699 text_pipe_io%b
+G a e
+G c Z s b [write_line text_pipe_io 11 25 none]
+G c Z s b [read_line text_pipe_io 15 24 none]
+G c Z s b [set_input text_pipe_io 18 14 none]
+G c Z s b [set_output text_pipe_io 22 14 none]
+G c Z s s [text_channel_typeDF text_pipe_io 28 9 none]
+G c Z s s [text_channel_typeIP text_pipe_io 28 9 none]
+G r s root_aio_channel_type [text_channel_typeIP text_pipe_io 28 9 none] [root_aio_channel_typeIP agnostic_io 18 9 none]
+X 1 ada.ads
+16K9*Ada 20e8 25|1r6 20r27 24r27 29r21 30r21 26|8r7 13r8 18r27 26r27
+X 6 a-textio.ads
+57K13*Text_IO 727e16 25|1w10 20r31 24r31 29r25 30r25 26|8r11 13r12 18r31
+. 26r31
+64P9*File_Type
+185P9*File_Access(64P9) 25|20r39 24r39 29r33 30r33 26|18r39 26r39
+495V13*Get_Line{string} 26|13s20
+508U14*Put_Line 26|8s19
+X 8 agnostic_io.ads
+1K9*Agnostic_IO 20e16 25|3w6 9r10 28r34
+5H9*Root_AIO_Channel_Type 18e69 25|9r22 28r46
+X 25 text_pipe_io.ads
+6K9*Text_Pipe_IO 28E9 33l5 33e17 26|1b14 34l5 34t17
+8R9*Text_Channel_Type<8|5R9> 11P25 12r24 15P24 16r24 18p14 19r27 22p14 23r27
+. 28c9 31e14 26|4r24 12r24 17r27 25r27
+11U25*Write_Line<8|9p14> 12=7 13>7 26|3b25 9l8 9t18
+12r7 Channel{8R9} 26|4b7
+13a7 Data{string} 26|5b7 8r29
+15V24*Read_Line{string}<8|13p13> 16=7 26|11b24
+16r7 Channel{8R9}
+18U14*Set_Input 19=7 20>7 26|16b14 22l8 22t17
+19r7 On_Channel{8R9} 26|17b7 21m7
+20p7 To_Pipe{6|185P9} 26|18b7 21r32
+22U14*Set_Output 23=7 24>7 26|24b14 30l8 30t18
+23r7 On_Channel{8R9} 26|25b7 29m7
+24p7 To_Pipe{6|185P9} 26|26b7 29r33
+29p7 Input_Pipe{6|185P9} 26|21m18
+30p7 Output_Pipe{6|185P9} 26|29m18
+

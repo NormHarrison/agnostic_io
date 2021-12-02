@@ -1,0 +1,152 @@
+V "GNAT Lib v10"
+A -gnatA
+A -gnatwa
+A -gnatwe
+A -mtune=generic
+A -march=x86-64
+P SS ZX
+
+RN
+RV NO_DISPATCHING_CALLS
+RV NO_RECURSION
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_STREAMS
+RV NO_DYNAMIC_SIZED_OBJECTS
+RV NO_IMPLEMENTATION_PRAGMAS
+RV NO_ELABORATION_CODE
+RV SPARK_05
+
+U socket_io%b		socket_io.adb		4f02173d OO PK
+Z ada.streams%s		a-stream.adb		a-stream.ali
+Z ada.tags%s		a-tags.adb		a-tags.ali
+Z system.concat_2%s	s-conca2.adb		s-conca2.ali
+Z system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+Z system.strings.stream_ops%s  s-ststop.adb	s-ststop.ali
+
+U socket_io%s		socket_io.ads		6c66f019 EE OO PF PK
+W ada%s			ada.ads			ada.ali
+W ada.streams%s		a-stream.adb		a-stream.ali
+Z ada.tags%s		a-tags.adb		a-tags.ali
+W agnostic_io%s		agnostic_io.ads		agnostic_io.ali
+W gnat%s		gnat.ads		gnat.ali
+W gnat.sockets%s	g-socket.adb		g-socket.ali
+Z system%s		system.ads		system.ali
+Z system.soft_links%s	s-soflin.adb		s-soflin.ali
+
+D ada.ads		20200723063517 76789da1 ada%s
+D a-charac.ads		20200723063517 2d3ec45b ada.characters%s
+D a-chlat1.ads		20200723063517 66457d31 ada.characters.latin_1%s
+D a-except.ads		20200723063517 a7106115 ada.exceptions%s
+D a-finali.ads		20200723063517 bf4f806b ada.finalization%s
+D a-stream.ads		20200723063517 119b8fb3 ada.streams%s
+D a-string.ads		20200723063517 90ac6797 ada.strings%s
+D a-strmap.ads		20200723063517 e8bb714a ada.strings.maps%s
+D a-strunb.ads		20200723063517 1656705b ada.strings.unbounded%s
+D a-tags.ads		20200723063517 491b781d ada.tags%s
+D a-unccon.ads		20200723063517 0e9b276f ada.unchecked_conversion%s
+D a-uncdea.ads		20200723063517 eff36322 ada.unchecked_deallocation%s
+D agnostic_io.ads	20211202013640 2f6f4b46 agnostic_io%s
+D gnat.ads		20200723063517 b5988c27 gnat%s
+D g-socket.ads		20200723063517 af0c6c01 gnat.sockets%s
+D interfac.ads		20200723063517 5ab55268 interfaces%s
+D i-c.ads		20200723063517 5421119b interfaces.c%s
+D socket_io.ads		20211202013716 fd9e58ed socket_io%s
+D socket_io.adb		20211202012714 b29c4fd0 socket_io%b
+D system.ads		20200723063517 4635ec04 system%s
+D s-atocou.ads		20200723063517 b45c2d8d system.atomic_counters%s
+D s-conca2.ads		20200723063517 02a0d7d0 system.concat_2%s
+D s-exctab.ads		20200723063517 54135002 system.exception_table%s
+D s-finmas.ads		20200723063517 7811a767 system.finalization_masters%s
+D s-finroo.ads		20200723063517 4ff27390 system.finalization_root%s
+D s-oscons.ads		20210110113539 2da46a9c system.os_constants%s
+D s-parame.ads		20200723063517 48ec542b system.parameters%s
+D s-pooglo.ads		20200723063517 ede33ef8 system.pool_global%s
+D s-secsta.ads		20200723063517 20bbe636 system.secondary_stack%s
+D s-soflin.ads		20200723063517 a7318a92 system.soft_links%s
+D s-stache.ads		20200723063517 a37c21ec system.stack_checking%s
+D s-stalib.ads		20200723063517 09bd3940 system.standard_library%s
+D s-stoele.ads		20200723063517 2dc34a04 system.storage_elements%s
+D s-stoele.adb		20200723063517 ed88f8fb system.storage_elements%b
+D s-stopoo.ads		20200723063517 b16154c2 system.storage_pools%s
+D s-stposu.ads		20200723063517 97a6219c system.storage_pools.subpools%s
+D s-stratt.ads		20200723063517 aedef97e system.stream_attributes%s
+D s-string.ads		20200723063517 8fe54fb7 system.strings%s
+D s-ststop.ads		20200723063517 5fbf1b38 system.strings.stream_ops%s
+D s-traent.ads		20200723063517 005bf670 system.traceback_entries%s
+D s-unstyp.ads		20200723063517 34867c83 system.unsigned_types%s
+G a e
+G c Z s b [write_line socket_io 15 25 none]
+G c Z s b [read_line socket_io 19 24 none]
+G c Z s b [set_socket socket_io 22 14 none]
+G c Z s b [is_connected socket_io 26 13 none]
+G c Z s s [socket_channel_typeDF socket_io 30 9 none]
+G c Z s s [socket_channel_typeIP socket_io 30 9 none]
+G r s root_aio_channel_type [socket_channel_typeIP socket_io 30 9 none] [root_aio_channel_typeIP agnostic_io 18 9 none]
+X 1 ada.ads
+16K9*Ada 20e8 18|1r6 10r25 19|25r11 85r19
+X 6 a-stream.ads
+36K13*Streams 87e16 18|1w10 10r29 19|25r15 85r23
+42M9*Stream_Element 19|35r36
+44I9*Stream_Element_Offset<long_long_integer> 18|10r37 19|33r28 54r23 82r27
+. 90r26 91r26
+54A9*Stream_Element_Array(42M9)<44I9> 19|32r28 53r23 85r31
+X 13 agnostic_io.ads
+1K9*Agnostic_IO 20e16 18|5w6 13r10 31r10
+5H9*Root_AIO_Channel_Type 18e69 18|13r22 31r22
+X 14 gnat.ads
+34K9*GNAT 57e9 18|3r6 24r24 32r21 32r49 19|14r21 87r24 88r13 95r28 98r10
+. 151r24
+X 15 g-socket.ads
+56K14*Sockets 1576e17 18|3w11 24r29 32r26 32r54 19|14r26 87r29 88r18 95r33
+. 98r15 151r29
+413I9*Socket_Type<integer> 18|24r37 32r34 19|151r37
+418i4*No_Socket{413I9} 18|32r62
+998M9*Request_Flag_Type 19|87r37
+1000m4*No_Request_Flag{998M9} 19|95r41
+1008m4*Peek_At_Incoming_Data{998M9} 19|88r26
+1207U14*Receive_Socket 19|98s23
+1208i7 Socket{413I9} 19|99r13
+1209a7 Item{6|54A9} 19|100r13
+1210i7 Last{6|44I9} 19|101r13
+1211m7 Flags{998M9} 19|102r13
+1317P9*Stream_Access(6|39R9)
+1320V13*Stream{1317P9} 19|14s34
+X 18 socket_io.ads
+8K9*Socket_IO 30E9 36l5 36e14 19|1b14 168l5 168t14
+10I12*SE_Offset{6|44I9} 12r50 30r50
+12R9*Socket_Channel_Type<13|5R9> 12d30 15P25 16r24 19P24 20r24 22p14 23r24
+. 26p13 26r40 30c9 34e16 19|8r24 23r24 150r24 165r40
+12i30*Buffer_Start_Size{10I12} 30r30 19|141r33
+15U25*Write_Line<13|9p14> 16=7 17>7 19|7b25 16l8 16t18
+16r7 Channel{12R9} 19|8b7 14r42
+17a7 Data{string} 19|9b7 14r59
+19V24*Read_Line{string}<13|13p13> 20=7 19|22b24 143l8 143t17
+20r7 Channel{12R9} 19|23b7 99r23 110m13 141r25
+22U14*Set_Socket 23=7 24>7 19|149b14 159l8 159t18
+23r7 Channel{12R9} 19|150b7 156m7 157m7
+24i7 Socket{15|413I9} 19|151b7 157r28
+26V13*Is_Connected{boolean} 26>27 19|165b13
+26r27 Channel{12R9} 19|166r8
+32i9 Socket{15|413I9} 19|14r50 99r31 157m15
+33b9 Connected{boolean} 19|110m21 156m15 166r16
+X 19 socket_io.adb
+11e7 Line_Feed{character} 14r66
+31V16 Found_Line_Feed{boolean} 31b16 32>10 33<10 46l11 46t26 121s16
+32a10 Buffer{6|54A9} 38r23 39r16
+33i10 Position{6|44I9} 40m16
+35m10 Line_Feed_Code{6|42M9} 39r33
+38i14 Index<long_long_integer> 39r24 40r28
+52V16 To_String{string} 52b16 53>10 54>10 75l11 75t20 117s20
+53a10 Buffer{6|54A9} 64r23 66r63
+54i10 Stop_At{6|44I9} 56r48 59r13 68r24
+56a10 String_Buffer{string} 66m13 69r23
+64i14 Index<long_long_integer> 66r37 66r71 68r16
+81V16 Get_Data{string} 81b16 82>10 83>10 124s20 131s20 135l11 135t19 140s14
+82i10 Buffer_Size{6|44I9} 85r58 125r16 132r16 132r31 132r45 141r10
+83b10 Just_Peek{boolean} 94r17 114r20 126r16 133r16 142r10
+85a10 Buffer{6|54A9} 100m23 107r27 117r31 117r39 121r33
+87m10 Socket_Flag{15|998M9} 95m13 102r23
+90i10 Last_Index{6|44I9} 101m23 107r13 121r46
+91i10 Line_Feed_Pos{6|44I9} 121m59 121r59 125r31
+
