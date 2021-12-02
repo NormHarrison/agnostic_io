@@ -9,12 +9,12 @@ package body Text_Pipe_AIO is
       Data    : in     String)
    is
    begin
-      Ada.Text_IO.Put_Line (Channel.Output_Pipe, Data);
+      Ada.Text_IO.Put_Line (Channel.Output_Pipe.all, Data);
    end Write_Line;
 
    overriding function Read_Line
      (Channel : in out Text_Channel_Type) return String
-   is (Ada.Text_IO.Get_Line);
+   is (Ada.Text_IO.Get_Line (Channel.Input_Pipe.all));
 
    procedure Set_Input
      (On_Channel : in out Text_Channel_Type;
