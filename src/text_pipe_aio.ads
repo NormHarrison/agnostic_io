@@ -8,6 +8,7 @@ package Text_Pipe_AIO is
    type Text_Channel_Type is
      new Agnostic_IO.Root_AIO_Channel_Type with private;
 
+   --  ! This isn't needed really.
    function To_Channel_Access (Channel : in Text_Channel_Type)
      return Agnostic_IO.Root_AIO_Channel_Access;
 

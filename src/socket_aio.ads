@@ -23,6 +23,11 @@ package Socket_AIO is
      (Channel : in out Socket_Channel_Type;
       Socket  : in     GNAT.Sockets.Socket_Type);
 
+   function To_Socket (Channel : in Socket_Channel_Type)
+     return GNAT.Sockets.Socket_Type;
+
+   procedure Close (Channel : in out Socket_Channel_Type);
+
    function Is_Connected (Channel : in Socket_Channel_Type) return Boolean;
 
 private

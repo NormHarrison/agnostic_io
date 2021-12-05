@@ -158,6 +158,24 @@ package body Socket_AIO is
       --  ! Forcefully close the previous socket when re-setting?
    end Set_Socket;
 
+   ---------------
+   -- To_Socket --
+   ---------------
+
+   function To_Socket (Channel : in Socket_Channel_Type)
+     return GNAT.Sockets.Socket_Type
+   is (Channel.Socket);
+
+   -----------
+   -- Close --
+   -----------
+
+   procedure Close (Channel : in out Socket_Channel_Type) is
+   begin
+      GNAT.Sockets.Close_Socket (Channel.Socket);
+      Channel.Connected := False;
+   end Close;
+
    ------------------
    -- Is_Connected --
    ------------------
