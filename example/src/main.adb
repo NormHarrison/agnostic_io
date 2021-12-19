@@ -8,7 +8,7 @@ with Socket_AIO;
 
 procedure Main is
 
-   Agnostic_Channel : Agnostic_IO.Root_AIO_Channel_Access;
+   Agnostic_Channel : Agnostic_IO.Root_Channel_Access;
 
    procedure Test_Text_AIO is
       Text_Channel   : Text_Pipe_AIO.Text_Channel_Type;
@@ -16,10 +16,11 @@ procedure Main is
    begin
       Put_Line ("Testing text pipe AIO:");
 
-      Text_Channel.Set_Input  (To_Pipe => Standard_Input);
-      Text_Channel.Set_Output (To_Pipe => Standard_Output);
+      Text_Channel.Set_Pipes
+        (Input  => Standard_Input,
+         Output => Standard_Output);
 
-      Agnostic_Channel := Text_Channel.To_Channel_Access;
+      Agnostic_Channel := Text_Channel'Unrestricted_Access;
 
       Agnostic_Channel.Write_Line ("Test123");
       Put ("Type something >");
@@ -38,7 +39,23 @@ procedure Main is
 
       Socket         : GNAT.Sockets.Socket_Type;
       Connection     : GNAT.Sockets.Socket_Type;
-      Socket_Channel : Socket_AIO.Socket_Channel_Type;
+      Socket_Channel : Socket_AIO.Socket_Channel_Type
+        (Buffer_Start_Size => 100,
+         Line_Ending       => Socket_AIO.Carriage_Return_Line_Feed);
+
+      task Concurrent_Close is
+         entry Start;
+      end Concurrent_Close;
+
+      task body Concurrent_Close is
+      begin
+         accept Start;
+
+         Put_Line ("Closing socket in 5 seconds...");
+         delay 5.0;
+
+         Socket_Channel.Close;
+      end Concurrent_Close;
 
    begin
       Put_Line ("Testing socket AIO:");
@@ -61,6 +78,8 @@ procedure Main is
 
       Socket_Channel.Write_Line ("Test123");
 
+      Concurrent_Close.Start;
+
       while Socket_Channel.Is_Connected loop
          declare
             Data : constant String := Socket_Channel.Read_Line;
@@ -70,7 +89,7 @@ procedure Main is
          end;
       end loop;
 
-      GNAT.Sockets.Close_Socket (Connection);
+      Socket_Channel.Close;
    end Test_Socket_AIO;
 
 begin

@@ -1,37 +1,25 @@
 package body Text_Pipe_AIO is
 
-   function To_Channel_Access (Channel : in Text_Channel_Type)
-     return Agnostic_IO.Root_AIO_Channel_Access
-   is (Channel'Unrestricted_Access);
-
-   overriding procedure Write_Line
-     (Channel : in out Text_Channel_Type;
-      Data    : in     String)
+   procedure Write_Line
+     (Self : in out Text_Channel_Type;
+      Data : in     String)
    is
    begin
-      Ada.Text_IO.Put_Line (Channel.Output_Pipe.all, Data);
+      Ada.Text_IO.Put_Line (Self.Output_Pipe.all, Data);
    end Write_Line;
 
-   overriding function Read_Line
-     (Channel : in out Text_Channel_Type) return String
-   is (Ada.Text_IO.Get_Line (Channel.Input_Pipe.all));
+   function Read_Line (Self : in out Text_Channel_Type) return String
+   is (Ada.Text_IO.Get_Line (Self.Input_Pipe.all));
 
-   procedure Set_Input
-     (On_Channel : in out Text_Channel_Type;
-      To_Pipe    : in     Ada.Text_IO.File_Access)
+   procedure Set_Pipes
+     (Self   : in out Text_Channel_Type;
+      Input  : in     Ada.Text_IO.File_Access;
+      Output : in     Ada.Text_IO.File_Access)
    is
    begin
-      On_Channel.Input_Pipe := To_Pipe;
-   end Set_Input;
-
-   procedure Set_Output
-     (On_Channel : in out Text_Channel_Type;
-      To_Pipe    : in     Ada.Text_IO.File_Access)
-   is
-   begin
-      On_Channel.Output_Pipe := To_Pipe;
-   end Set_Output;
-
-
+      Self.Input_Pipe  := Input;
+      Self.Output_Pipe := Output;
+   end Set_Pipes;
 
 end Text_Pipe_AIO;
+
