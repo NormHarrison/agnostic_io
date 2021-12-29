@@ -34,11 +34,14 @@ package body Socket_AIO is
       Line_Ending_Length : constant Stream_Element_Offset :=
         Line_Ending_Lengths (Self.Line_Ending);
 
-      Line_Length : constant Stream_Element_Offset :=
+      Line_Start : constant Stream_Element_Offset :=
+        Stream_Element_Offset (Data'First);
+
+      Line_End : constant Stream_Element_Offset :=
         Stream_Element_Offset (Data'Last) + Line_Ending_Length;
 
-      Socket_Data : Stream_Element_Array (1 .. Line_Length);
-      Last_Index  : Stream_Element_Offset := 1;
+      Socket_Data : Stream_Element_Array (Line_Start .. Line_End);
+      Last_Index  : Stream_Element_Offset := Line_Start;
 
    begin
       for Index in Data'Range loop
