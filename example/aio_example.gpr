@@ -1,4 +1,4 @@
-with "../agnostic_io.gpr";
+with "../ada_agnostic_io.gpr";
 
 
 project AIO_Example is

@@ -1,4 +1,4 @@
---with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 
 
 package body Socket_AIO is
@@ -82,6 +82,7 @@ package body Socket_AIO is
    overriding function Read_Line
      (Self : in out Socket_Channel_Type) return String
    is
+      Recursion_Count : Natural := 0;
 
       -----------------------
       -- Found_Line_Ending --
@@ -94,20 +95,31 @@ package body Socket_AIO is
          Slice_End : constant Stream_Element_Offset :=
            (Line_Ending_Lengths (Self.Line_Ending) - 1);
 
+         Codes : constant Stream_Element_Array :=
+           Line_Ending_Code (Self.Line_Ending);
+
+         Code_Index : Stream_Element_Offset := 0;
+
       begin
          for Index in Buffer'Range loop
 
-            exit when (Index + Slice_End) > Buffer'Last;
+            if Buffer (Index) = Codes (Code_Index) then
 
-            if Buffer (Index .. (Index + Slice_End)) =
-               Line_Ending_Code (Self.Line_Ending)
-            then
-               Position := (Index + Slice_End);
-               return True;
+               if Code_Index = Codes'Last then
+                  Position := (Index + Slice_End);
+                  return True;
+               end if;
+               Code_Index := Code_Index + 1;
+
+            else
+
+               Code_Index := 0;
+
             end if;
 
          end loop;
 
+         Position := 0;
          return False;
 
       end Found_Line_Ending;
@@ -171,8 +183,13 @@ package body Socket_AIO is
             Last   => Last_Index,
             Flags  => Socket_Flag);
 
-         if Last_Index = (Buffer'First - 1) then
-            --  Socket was closed by peer.
+         if Recursion_Count = Self.Recursion_Limit then
+            Put_Line ("[DEBUG] RECURSION LIMIT REACHED IN SOCKET_AIO PACKAGE");
+            return "";
+
+         elsif Last_Index = (Buffer'First - 1) then
+            --  Socket was closed by peer (doesn't apply to when
+            --  the socket is closed from our end).
             Self.Close;
             return "";
 
@@ -194,6 +211,8 @@ package body Socket_AIO is
 
          else
             --  Complete line not found yet, more data is needed.
+
+            Recursion_Count := Recursion_Count + 1;
 
             return Get_Data
               (Buffer_Size => Buffer_Size + Buffer_Size,

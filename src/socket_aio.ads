@@ -21,7 +21,8 @@ package Socket_AIO is
 
    type Socket_Channel_Type
      (Buffer_Start_Size : Ada.Streams.Stream_Element_Offset;
-      Line_Ending       : Line_Ending_Type) is
+      Line_Ending       : Line_Ending_Type;
+      Recursion_Limit   : Positive) is
    limited new Agnostic_IO.Root_Channel_Type with private;
 
    overriding procedure Write_Line
@@ -54,8 +55,9 @@ private
       Carriage_Return_Line_Feed => 2);
 
    type Socket_Channel_Type
-     (Buffer_Start_Size : Ada.Streams.Stream_Element_Offset;
-      Line_Ending       : Line_Ending_Type)
+     (Buffer_Start_Size  : Ada.Streams.Stream_Element_Offset;
+      Line_Ending        : Line_Ending_Type;
+      Recursion_Limit    : Positive)
    is limited new Agnostic_IO.Root_Channel_Type with record
       Socket    : GNAT.Sockets.Socket_Type := GNAT.Sockets.No_Socket;
       Connected : Boolean                  := False;

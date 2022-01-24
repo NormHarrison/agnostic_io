@@ -41,7 +41,8 @@ procedure Main is
       Connection     : GNAT.Sockets.Socket_Type;
       Socket_Channel : Socket_AIO.Socket_Channel_Type
         (Buffer_Start_Size => 100,
-         Line_Ending       => Socket_AIO.Carriage_Return_Line_Feed);
+         Line_Ending       => Socket_AIO.Carriage_Return_Line_Feed,
+         Recursion_Limit   => 4);
 
       task Concurrent_Close is
          entry Start;
@@ -58,7 +59,8 @@ procedure Main is
       end Concurrent_Close;
 
    begin
-      Put_Line ("Testing socket AIO:");
+      Put_Line ("Testing socket AIO, connect to "
+        & GNAT.Sockets.Image (Bind_Address));
 
       GNAT.Sockets.Create_Socket
         (Socket => Socket,
