@@ -12,7 +12,9 @@ package Text_Pipe_AIO is
      (Self : in out Text_Channel_Type;
       Data : in     String);
 
-   function Read_Line (Self : in out Text_Channel_Type) return String;
+   function Read_Line
+     (Self  : in out Text_Channel_Type;
+      Error :    out Agnostic_IO.Read_Error_Kind) return String;
 
    procedure Set_Pipes
      (Self   : in out Text_Channel_Type;

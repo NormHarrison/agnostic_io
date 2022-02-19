@@ -8,8 +8,18 @@ package body Text_Pipe_AIO is
       Ada.Text_IO.Put_Line (Self.Output_Pipe.all, Data);
    end Write_Line;
 
-   function Read_Line (Self : in out Text_Channel_Type) return String
-   is (Ada.Text_IO.Get_Line (Self.Input_Pipe.all));
+   function Read_Line
+     (Self  : in out Text_Channel_Type;
+      Error :    out Agnostic_IO.Read_Error_Kind) return String
+   is
+   begin
+      Error := Agnostic_IO.No_Error;
+      return Ada.Text_IO.Get_Line (Self.Input_Pipe.all);
+   exception
+      when others =>
+         Error := Agnostic_IO.Read_Error;
+         return "";
+   end Read_Line;
 
    procedure Set_Pipes
      (Self   : in out Text_Channel_Type;

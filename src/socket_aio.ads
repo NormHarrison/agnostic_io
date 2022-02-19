@@ -44,24 +44,17 @@ package Socket_AIO is
    -- Reading --
    -------------
 
-   Recursion_Limit_Error : exception;
-   --  The only exception unique to this package, exclusively raised
-   --  by the two reading function when the internal recursion count
-   --  reaches the discriminant `Recursion_Limit` set on a
-   --  `Socket_Channel_Type` instance. The goal of raising this exception
-   --  is to prevent stack overflows.
-
    overriding function Read_Line
-     (Self : in out Socket_Channel_Type) return String;
+     (Self  : in out Socket_Channel_Type;
+      Error :    out Agnostic_IO.Read_Error_Kind) return String;
 
    function To_Stream_Element_Array
      (S : in String) return Ada.Streams.Stream_Element_Array;
 
    function Read
      (Self      : in out Socket_Channel_Type;
-      Delimiter : in     Ada.Streams.Stream_Element_Array) return String;
-   --  ! Is there a sane way to make this block for until the delimiter is
-   --    found? (similiar to reading from pipes.)
+      Delimiter : in     Ada.Streams.Stream_Element_Array;
+      Error     :    out Agnostic_IO.Read_Error_Kind) return String;
 
    --  Raises `GNAT.Sockets.Socket_Error` for the same reasons that
    --  `GNAT.Sockets.Receive_Socket` does, and raises `Recursion_Limit_Error`

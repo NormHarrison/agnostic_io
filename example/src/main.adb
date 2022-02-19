@@ -12,7 +12,8 @@ procedure Main is
    Agnostic_Channel : Agnostic_IO.Root_Channel_Access;
 
    procedure Test_Text_AIO is
-      Text_Channel   : Text_Pipe_AIO.Text_Channel_Type;
+      Text_Channel : Text_Pipe_AIO.Text_Channel_Type;
+      Read_Error   : Agnostic_IO.Read_Error_Kind;
 
    begin
       Put_Line ("Testing text pipe AIO:");
@@ -24,12 +25,18 @@ procedure Main is
       Agnostic_Channel := Text_Channel'Unrestricted_Access;
 
       Agnostic_Channel.Write_Line ("Test123");
+
       Put ("Type something >");
-      Agnostic_Channel.Write_Line ("You typed: " & Agnostic_Channel.Read_Line);
+
+      Agnostic_Channel.Write_Line ("You typed: "
+        & Agnostic_Channel.Read_Line (Read_Error));
+
    end Test_Text_AIO;
 
 
    procedure Test_Socket_AIO is
+      use type Agnostic_IO.Read_Error_Kind;
+
       Bind_Address : constant GNAT.Sockets.Sock_Addr_Type :=
         (Family => GNAT.Sockets.Family_Inet,
          Port   => 1234,
@@ -47,6 +54,8 @@ procedure Main is
 
       Custom_Delimiter : constant Ada.Streams.Stream_Element_Array :=
         Socket_AIO.To_Stream_Element_Array ("!!!");
+
+      Read_Error : Agnostic_IO.Read_Error_Kind;
 
       --task Concurrent_Close is
          --entry Start;
@@ -88,8 +97,11 @@ procedure Main is
 
       while Socket_Channel.Is_Connected loop
          declare
-            Data : constant String := Socket_Channel.Read (Custom_Delimiter);
+            Data : constant String := Socket_Channel.Read
+              (Delimiter => Custom_Delimiter,
+               Error     => Read_Error);
          begin
+            exit when Read_Error /= Agnostic_IO.No_Error;
             Put_Line ("Count: " & Integer'Image (Data'Length));
             Put_Line (Data);
          end;

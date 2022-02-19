@@ -112,8 +112,10 @@ package body Socket_AIO is
    ---------------
 
    overriding function Read_Line
-     (Self : in out Socket_Channel_Type) return String
-   is (Self.Read (Line_Endings (Self.Line_Ending).all));
+     (Self  : in out Socket_Channel_Type;
+      Error :    out Agnostic_IO.Read_Error_Kind) return String
+   is (Self.Read (Delimiter => Line_Endings (Self.Line_Ending).all,
+                  Error     => Error));
 
    ------------------------
    -- Contains_Delimiter --
@@ -158,6 +160,7 @@ package body Socket_AIO is
      (Self            : in out Socket_Channel_Type;
       Delimiter       : in     Stream_Element_Array;
       Buffer_Size     : in     Stream_Element_Offset; --  ! Try to use `Self.Buffer_Start_Size` instead?
+      Error           :    out Agnostic_IO.Read_Error_Kind;
       Just_Peek       : in     Boolean := True;
       Recursion_Count : in     Natural := 0) return String
    is
@@ -182,6 +185,7 @@ package body Socket_AIO is
          --  Socket was closed by peer (doesn't apply to when
          --  the socket is closed from our end).
          Self.Connected := False;
+         Error := Agnostic_IO.No_Error;
          return "";
 
       else
@@ -191,6 +195,7 @@ package body Socket_AIO is
             --  and recursion is complete, return the data
             --  read excluding the delimiter.
 
+            Error := Agnostic_IO.No_Error;
             return To_String
               (Buffer (Buffer'First .. Last_Index - Delimiter'Length));
 
@@ -204,22 +209,18 @@ package body Socket_AIO is
             return Self.Recursive_Receive_Socket
               (Buffer_Size     => Delimiter_Position,
                Delimiter       => Delimiter,
+               Error           => Error,
                Just_Peek       => False,
                Recursion_Count => Recursion_Count + 1);
 
          else
-            --  but more data is needed...
+            --  although more data is needed...
 
             if Recursion_Count = Self.Recursion_Limit then
                --  but the recursion limit was reached.
 
-               raise Recursion_Limit_Error with
-                 Stream_Element_Offset'Image (Self.Buffer_Start_Size)
-                    & " bytes were read from the socket"
-                    & Positive'Image (Self.Recursion_Limit)
-                    & " times, but the delimiter """
-                    & To_String (Delimiter)
-                    & """ wasn't found.";
+               Error := Agnostic_IO.Recursion_Limit_Error;
+               return "";
 
             else
                --  and we are still within the recusion limit.
@@ -227,6 +228,7 @@ package body Socket_AIO is
                return Self.Recursive_Receive_Socket
                  (Buffer_Size     => Buffer_Size + Buffer_Size,
                   Delimiter       => Delimiter,
+                  Error           => Error,
                   Just_Peek       => True,
                   Recursion_Count => Recursion_Count + 1);
             end if;
@@ -236,6 +238,7 @@ package body Socket_AIO is
    exception
       when GNAT.Sockets.Socket_Error =>
          Self.Connected := False;
+         Error := Agnostic_IO.Read_Error;
          raise;
 
    end Recursive_Receive_Socket;
@@ -246,9 +249,11 @@ package body Socket_AIO is
 
    function Read
      (Self      : in out Socket_Channel_Type;
-      Delimiter : in     Stream_Element_Array) return String
-   is (Self.Recursive_Receive_Socket (Buffer_Size     => Self.Buffer_Start_Size,
-                                      Delimiter       => Delimiter));
+      Delimiter : in     Stream_Element_Array;
+      Error     :    out Agnostic_IO.Read_Error_Kind) return String
+   is (Self.Recursive_Receive_Socket (Buffer_Size => Self.Buffer_Start_Size,
+                                      Delimiter   => Delimiter,
+                                      Error       => Error));
 
    ----------------
    -- Set_Socket --
