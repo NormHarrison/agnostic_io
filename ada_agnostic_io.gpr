@@ -6,7 +6,13 @@ project Ada_Agnostic_IO is
 
    package Compiler is
       for Switches ("Ada") use
-        ("-gnatwae");
+        ("-gnatwae",
+         "-g");
    end Compiler;
 
+   package Binder is
+      for Switches ("Ada") use
+        ("-E");
+   end Binder;
+   
 end Ada_Agnostic_IO;

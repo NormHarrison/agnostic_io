@@ -1,25 +1,27 @@
-with Ada.Text_IO; use Ada.Text_IO;
+--with Ada.Text_IO; use Ada.Text_IO;
 
 
 package body Socket_AIO is
 
-   use Ada.Streams;
+   ---------------
+   -- To_String --
+   ---------------
 
-   ----------------------
-   -- Line_Ending_Code --
-   ----------------------
-
-   function Line_Ending_Code
-     (Line_Ending : in Line_Ending_Type) return Stream_Element_Array
-   with Inline
+   function To_String (Elements : in Stream_Element_Array) return String
    is
+      String_Buffer : String (1 .. Integer (Elements'Length));
+      String_Index  : Positive := 1;
+
    begin
-      case Line_Ending is
-         when Line_Feed                 => return (0 => 10);
-         when Carriage_Return           => return (0 => 13);
-         when Carriage_Return_Line_Feed => return (0 => 13, 1 => 10);
-      end case;
-   end Line_Ending_Code;
+      for Elements_Index in Elements'Range loop
+         String_Buffer (String_Index) :=
+           Character'Val (Elements (Elements_Index));
+         --  Convert each stream element into its corresponding ASCII character.
+         String_Index := String_Index + 1;
+      end loop;
+
+      return String_Buffer;
+   end To_String;
 
    ----------------
    -- Write_Line --
@@ -29,34 +31,38 @@ package body Socket_AIO is
      (Self : in out Socket_Channel_Type;
       Data : in     String)
    is
-      subtype SE_Offset is Ada.Streams.Stream_Element_Offset;
+   begin
+      Self.Write (Data & To_String (Line_Endings (Self.Line_Ending).all));
+   end Write_Line;
 
-      Line_Ending_Length : constant Stream_Element_Offset :=
-        Line_Ending_Lengths (Self.Line_Ending);
+   -----------
+   -- Write --
+   -----------
 
+   procedure Write
+     (Self : in out Socket_Channel_Type;
+      Data : in     String)
+   is
       Line_Start : constant Stream_Element_Offset :=
         Stream_Element_Offset (Data'First);
 
       Line_End : constant Stream_Element_Offset :=
-        Stream_Element_Offset (Data'Last) + Line_Ending_Length;
+        Stream_Element_Offset (Data'Length);
 
       Socket_Data : Stream_Element_Array (Line_Start .. Line_End);
       Last_Index  : Stream_Element_Offset := Line_Start;
 
    begin
       for Index in Data'Range loop
-         Socket_Data (SE_Offset (Index)) := Character'Pos (Data (Index));
+         Socket_Data (Stream_Element_Offset (Index)) :=
+           Character'Pos (Data (Index));
       end loop;
-
-      Socket_Data (SE_Offset (Data'Last) + 1 .. Socket_Data'Last) :=
-        Line_Ending_Code (Self.Line_Ending);
 
       loop
          GNAT.Sockets.Send_Socket
            (Socket => Self.Socket,
-            Item   => Socket_Data (Last_Index .. Socket_Data'Last),
+            Item   => Socket_Data (Last_Index .. Line_End),
             Last   => Last_Index);
-         --  ! Can raise `Socket_Error` exception, possibly add error handling.
 
          if Last_Index = Socket_Data'Last then
             --  Finished sending all data.
@@ -64,16 +70,42 @@ package body Socket_AIO is
 
          elsif Last_Index = Last_Index - 1 then
             --  Socket was closed by peer.
-            Self.Close;
+            Self.Connected := False;
             exit;
+
          end if;
       end loop;
 
    exception
       when GNAT.Sockets.Socket_Error =>
-         Self.Close;
+         Self.Connected := False;
+         raise;
 
-   end Write_Line;
+   end Write;
+
+   -----------------------------
+   -- To_Stream_Element_Array --
+   -----------------------------
+
+   function To_Stream_Element_Array
+     (S : in String) return Ada.Streams.Stream_Element_Array
+   is
+      Elements : Ada.Streams.Stream_Element_Array
+        (SE_Offset (S'First) .. SE_Offset (S'Last));
+      --  ! If we are ever to make `Elements` have an initial index
+      --    of 0, we must subtract 1 from the provided string's length
+      --    in order to avoid creating an empty, extra index.
+
+      Elements_Index : Ada.Streams.Stream_Element_Offset := Elements'First;
+
+   begin
+      for String_Index in S'Range loop
+         Elements (Elements_Index) :=
+           Stream_Element (Character'Pos (S (String_Index)));
+         Elements_Index := Elements_Index + 1;
+      end loop;
+      return Elements;
+   end To_Stream_Element_Array;
 
    ---------------
    -- Read_Line --
@@ -81,157 +113,142 @@ package body Socket_AIO is
 
    overriding function Read_Line
      (Self : in out Socket_Channel_Type) return String
+   is (Self.Read (Line_Endings (Self.Line_Ending).all));
+
+   ------------------------
+   -- Contains_Delimiter --
+   ------------------------
+
+   function Contains_Delimiter
+     (Delimiter : in     Stream_Element_Array;
+      In_Buffer : in     Stream_Element_Array;
+      Position  :    out Stream_Element_Offset) return Boolean
    is
-      Recursion_Count : Natural := 0;
-
-      -----------------------
-      -- Found_Line_Ending --
-      -----------------------
-
-      function Found_Line_Ending
-        (Buffer   : in     Stream_Element_Array;
-         Position :    out Stream_Element_Offset) return Boolean
-      is
-         Slice_End : constant Stream_Element_Offset :=
-           (Line_Ending_Lengths (Self.Line_Ending) - 1);
-
-         Codes : constant Stream_Element_Array :=
-           Line_Ending_Code (Self.Line_Ending);
-
-         Code_Index : Stream_Element_Offset := 0;
-
-      begin
-         for Index in Buffer'Range loop
-
-            if Buffer (Index) = Codes (Code_Index) then
-
-               if Code_Index = Codes'Last then
-                  Position := (Index + Slice_End);
-                  return True;
-               end if;
-               Code_Index := Code_Index + 1;
-
-            else
-
-               Code_Index := 0;
-
-            end if;
-
-         end loop;
-
-         Position := 0;
-         return False;
-
-      end Found_Line_Ending;
-
-      ---------------
-      -- To_String --
-      ---------------
-
-      function To_String
-        (Buffer  : in Stream_Element_Array;
-         Stop_At : in Stream_Element_Offset) return String
-      is
-         String_Buffer : String (1 .. Integer (Stop_At));
-
-      begin
-         if Stop_At = 0 then
-            --  Received data only consisted of the delimiting character.
-            return "";
-         end if;
-
-         for Index in Buffer'Range loop
-
-            String_Buffer (Integer (Index)) := Character'Val (Buffer (Index));
-
-            if Index = Stop_At then
-               return String_Buffer;
-            end if;
-
-         end loop;
-
-         return "";
-      end To_String;
-
-      --------------
-      -- Get_Data --
-      --------------
-
-      function Get_Data
-        (Buffer_Size : in Stream_Element_Offset;
-         Just_Peek   : in Boolean) return String
-      is
-         Line_Ending_Length : constant Stream_Element_Offset :=
-           Line_Ending_Lengths (Self.Line_Ending);
-
-         Buffer : Ada.Streams.Stream_Element_Array (1 .. Buffer_Size);
-
-         Socket_Flag : GNAT.Sockets.Request_Flag_Type :=
-            GNAT.Sockets.Peek_At_Incoming_Data;
-
-         Last_Index   : Stream_Element_Offset;
-         Line_End_Pos : Stream_Element_Offset;
-
-      begin
-         if not Just_Peek then
-            Socket_Flag := GNAT.Sockets.No_Request_Flag;
-         end if;
-
-         GNAT.Sockets.Receive_Socket
-           (Socket => Self.Socket,
-            Item   => Buffer,
-            Last   => Last_Index,
-            Flags  => Socket_Flag);
-
-         if Recursion_Count = Self.Recursion_Limit then
-            Put_Line ("[DEBUG] RECURSION LIMIT REACHED IN SOCKET_AIO PACKAGE");
-            return "";
-
-         elsif Last_Index = (Buffer'First - 1) then
-            --  Socket was closed by peer (doesn't apply to when
-            --  the socket is closed from our end).
-            Self.Close;
-            return "";
-
-         elsif not Just_Peek then
-            --  Complete line found, end recursion.
-
-            return To_String (Buffer, Buffer'Last - Line_Ending_Length);
-            --  ! Substract the line ending's length from the buffer's size
-            --    to prevent inclusion of the line end character(s) in the
-            --    final string. This will need to be dynamic when this package
-            --    is eventually adapted to support any delmiting character(s).
-
-         elsif Found_Line_Ending (Buffer (1 .. Last_Index), Line_End_Pos) then
-            --  Complete line found, do one more recursive call.
-
-            return Get_Data
-              (Buffer_Size => Line_End_Pos,
-               Just_Peek   => False);
-
-         else
-            --  Complete line not found yet, more data is needed.
-
-            Recursion_Count := Recursion_Count + 1;
-
-            return Get_Data
-              (Buffer_Size => Buffer_Size + Buffer_Size,
-               Just_Peek   => True);
-         end if;
-
-      exception
-         when GNAT.Sockets.Socket_Error =>
-            Self.Close;
-            return ""; --  ! Is it worth trying to return was already gathered?
-      end Get_Data;
-
-   --  Start of `Read_Line`.
+      Delimiter_Index : Stream_Element_Offset := Delimiter'First;
 
    begin
-      return Get_Data
-        (Buffer_Size => Self.Buffer_Start_Size,
-         Just_Peek   => True);
-   end Read_Line;
+      for Buffer_Index in In_Buffer'Range loop
+
+         if In_Buffer (Buffer_Index) = Delimiter (Delimiter_Index) then
+
+            if Delimiter_Index = Delimiter'Last then
+               Position := Buffer_Index;
+               return True;
+            end if;
+            Delimiter_Index := Delimiter_Index + 1;
+
+         else
+
+            Delimiter_Index := Delimiter'First;
+
+         end if;
+
+      end loop;
+
+      Position := 0;
+      return False;
+
+   end Contains_Delimiter;
+
+   ------------------------------
+   -- Recursive_Receive_Socket --
+   ------------------------------
+
+   function Recursive_Receive_Socket
+     (Self            : in out Socket_Channel_Type;
+      Delimiter       : in     Stream_Element_Array;
+      Buffer_Size     : in     Stream_Element_Offset; --  ! Try to use `Self.Buffer_Start_Size` instead?
+      Just_Peek       : in     Boolean := True;
+      Recursion_Count : in     Natural := 0) return String
+   is
+      --  ! Try to re-nest inside procedure `Read`?
+
+      Buffer : Ada.Streams.Stream_Element_Array (0 .. Buffer_Size);
+
+      Last_Index         : Stream_Element_Offset;
+      Delimiter_Position : Stream_Element_Offset;
+
+   begin
+      GNAT.Sockets.Receive_Socket
+        (Socket => Self.Socket,
+         Item   => Buffer,
+         Last   => Last_Index,
+         Flags  => (if Just_Peek then
+                       GNAT.Sockets.Peek_At_Incoming_Data
+                    else
+                       GNAT.Sockets.No_Request_Flag));
+
+      if Last_Index = (Buffer'First - 1) then
+         --  Socket was closed by peer (doesn't apply to when
+         --  the socket is closed from our end).
+         Self.Connected := False;
+         return "";
+
+      else
+         --  Data was successfully read...
+
+         if not Just_Peek then
+            --  and recursion is complete, return the data
+            --  read excluding the delimiter.
+
+            return To_String
+              (Buffer (Buffer'First .. Last_Index - Delimiter'Length));
+
+         elsif Contains_Delimiter
+                 (Delimiter => Delimiter,
+                  In_Buffer => Buffer (Buffer'First .. Last_Index),
+                  Position  => Delimiter_Position)
+         then
+            --  and the delimiting data was found. Perform one more recursion.
+
+            return Self.Recursive_Receive_Socket
+              (Buffer_Size     => Delimiter_Position,
+               Delimiter       => Delimiter,
+               Just_Peek       => False,
+               Recursion_Count => Recursion_Count + 1);
+
+         else
+            --  but more data is needed...
+
+            if Recursion_Count = Self.Recursion_Limit then
+               --  but the recursion limit was reached.
+
+               raise Recursion_Limit_Error with
+                 Stream_Element_Offset'Image (Self.Buffer_Start_Size)
+                    & " bytes were read from the socket"
+                    & Positive'Image (Self.Recursion_Limit)
+                    & " times, but the delimiter """
+                    & To_String (Delimiter)
+                    & """ wasn't found.";
+
+            else
+               --  and we are still within the recusion limit.
+
+               return Self.Recursive_Receive_Socket
+                 (Buffer_Size     => Buffer_Size + Buffer_Size,
+                  Delimiter       => Delimiter,
+                  Just_Peek       => True,
+                  Recursion_Count => Recursion_Count + 1);
+            end if;
+         end if;
+      end if;
+
+   exception
+      when GNAT.Sockets.Socket_Error =>
+         Self.Connected := False;
+         raise;
+
+   end Recursive_Receive_Socket;
+
+   ----------
+   -- Read --
+   ----------
+
+   function Read
+     (Self      : in out Socket_Channel_Type;
+      Delimiter : in     Stream_Element_Array) return String
+   is (Self.Recursive_Receive_Socket (Buffer_Size     => Self.Buffer_Start_Size,
+                                      Delimiter       => Delimiter));
 
    ----------------
    -- Set_Socket --

@@ -1,4 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Streams;
 
 with GNAT.Sockets;
 
@@ -44,19 +45,22 @@ procedure Main is
          Line_Ending       => Socket_AIO.Carriage_Return_Line_Feed,
          Recursion_Limit   => 4);
 
-      task Concurrent_Close is
-         entry Start;
-      end Concurrent_Close;
+      Custom_Delimiter : constant Ada.Streams.Stream_Element_Array :=
+        Socket_AIO.To_Stream_Element_Array ("!!!");
 
-      task body Concurrent_Close is
-      begin
-         accept Start;
+      --task Concurrent_Close is
+         --entry Start;
+      --end Concurrent_Close;
 
-         Put_Line ("Closing socket in 5 seconds...");
-         delay 5.0;
+      --task body Concurrent_Close is
+      --begin
+         --accept Start;
 
-         Socket_Channel.Close;
-      end Concurrent_Close;
+         --Put_Line ("Closing socket in 5 seconds...");
+         --delay 5.0;
+
+         --Socket_Channel.Close;
+      --end Concurrent_Close;
 
    begin
       Put_Line ("Testing socket AIO, connect to "
@@ -80,11 +84,11 @@ procedure Main is
 
       Socket_Channel.Write_Line ("Test123");
 
-      Concurrent_Close.Start;
+      --Concurrent_Close.Start;
 
       while Socket_Channel.Is_Connected loop
          declare
-            Data : constant String := Socket_Channel.Read_Line;
+            Data : constant String := Socket_Channel.Read (Custom_Delimiter);
          begin
             Put_Line ("Count: " & Integer'Image (Data'Length));
             Put_Line (Data);
