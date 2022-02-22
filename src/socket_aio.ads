@@ -50,6 +50,7 @@ package Socket_AIO is
 
    function To_Stream_Element_Array
      (S : in String) return Ada.Streams.Stream_Element_Array;
+   --  ! Only supports ASCII characters.
 
    function Read
      (Self      : in out Socket_Channel_Type;

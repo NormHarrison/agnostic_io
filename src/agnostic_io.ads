@@ -27,6 +27,7 @@ package Agnostic_IO is
       Data : in     String) is abstract;
 
    type Read_Error_Kind is
+   --  ! Consider renaming to `Read_Error_Type` or `Read_Error_Reason`.
    --  ! Should we use subtypes to defines ranges of the below
    --    values for certain packages (i.e. a range for pipe based
    --    IO, and a range for socket based IO)? Another thought was
@@ -41,14 +42,24 @@ package Agnostic_IO is
 
      (No_Error,
       --  Indicates that execution of the subprogram was normal
-      --  and no exception was raised.
+      --  and no exception or other abnormality was encountered.
+
+      Remote_Socket_Closure_Error,
+      --  The socket was closed from the other end.
 
       Recursion_Limit_Error,
       --  Indicates the internal recursion count reached the set limit.
 
-      Read_Error);
-      --  Indicates the underlying source of data can't be read from,
-      --  due to one of various reasons.
+      Source_Read_Error);
+      --  Indicates the underlying source of data can't be accessed.
+
+   Remote_Socket_Closure_Exception : exception;
+   Recursion_Limit_Exception       : exception;
+   Source_Read_Exception           : exception;
+   --  These exceptions have the same meanings as their equivalently
+   --  named enumeration values above and aare never actually raised
+   --  by any subprograms in this library. They are to by raised by
+   --  subprograms in packages/programs that make use of this library.
 
    function Read_Line
      (Self  : in out Root_Channel_Type;

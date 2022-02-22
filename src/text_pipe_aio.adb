@@ -17,7 +17,7 @@ package body Text_Pipe_AIO is
       return Ada.Text_IO.Get_Line (Self.Input_Pipe.all);
    exception
       when others =>
-         Error := Agnostic_IO.Read_Error;
+         Error := Agnostic_IO.Source_Read_Error;
          return "";
    end Read_Line;
 

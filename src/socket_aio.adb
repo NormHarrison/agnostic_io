@@ -47,7 +47,7 @@ package body Socket_AIO is
         Stream_Element_Offset (Data'First);
 
       Line_End : constant Stream_Element_Offset :=
-        Stream_Element_Offset (Data'Length);
+        Stream_Element_Offset (Data'Last);
 
       Socket_Data : Stream_Element_Array (Line_Start .. Line_End);
       Last_Index  : Stream_Element_Offset := Line_Start;
@@ -185,7 +185,7 @@ package body Socket_AIO is
          --  Socket was closed by peer (doesn't apply to when
          --  the socket is closed from our end).
          Self.Connected := False;
-         Error := Agnostic_IO.No_Error;
+         Error := Agnostic_IO.Remote_Socket_Closure_Error;
          return "";
 
       else
@@ -238,7 +238,7 @@ package body Socket_AIO is
    exception
       when GNAT.Sockets.Socket_Error =>
          Self.Connected := False;
-         Error := Agnostic_IO.Read_Error;
+         Error := Agnostic_IO.Source_Read_Error;
          raise;
 
    end Recursive_Receive_Socket;
@@ -284,8 +284,8 @@ package body Socket_AIO is
 
    procedure Close (Self : in out Socket_Channel_Type) is
    begin
-      GNAT.Sockets.Close_Socket (Self.Socket);
       Self.Connected := False;
+      GNAT.Sockets.Close_Socket (Self.Socket);
    end Close;
 
    ------------------
