@@ -78,8 +78,9 @@ package body Socket_AIO is
 
    exception
       when GNAT.Sockets.Socket_Error =>
+         --  ! Does the socket need to be closed here?
          Self.Connected := False;
-         raise;
+         return;
 
    end Write;
 
@@ -237,9 +238,10 @@ package body Socket_AIO is
 
    exception
       when GNAT.Sockets.Socket_Error =>
+         --  ! Does the socket need to be closed here?
          Self.Connected := False;
          Error := Agnostic_IO.Source_Read_Error;
-         raise;
+         return "";
 
    end Recursive_Receive_Socket;
 
