@@ -1,18 +1,44 @@
-project Ada_Agnostic_IO is
+library project Ada_Agnostic_IO is
 
-   for Source_Dirs            use ("src");
-   for Ignore_Source_Sub_Dirs use ("wip");
-   for Object_Dir             use "obj";
+   type Library_Type is ("static", "relocatable");
+   type Build_Type is ("release", "debug");
+
+   Library_Kind : Library_Type := external ("LIBRARY_TYPE", "static");
+   Build_Kind : Build_Type := external ("BUILD_TYPE", "debug");
+
+   for Source_Dirs use ("src");
+   for Create_Missing_Dirs use "true";
+      
+   for Object_Dir  use "obj/" & Build_Kind & "/" & Library_Kind;
+   for Library_Dir use "lib/" & Build_Kind & "/" & Library_Kind;
+
+   for Library_Name use "ada_agnostic_io";
+   for Library_Kind use Library_Kind;
+
+   Common_Compiler_Switches :=
+     ("-gnat2012",
+      "-gnatwae",
+      "-gnato",
+      "-gnatVa");
 
    package Compiler is
-      for Switches ("Ada") use
-        ("-gnatwae",
-         "-g");
+      case Build_Kind is
+         when "release" =>
+            for Default_Switches ("Ada") use
+               Common_Compiler_Switches;
+         when "debug"      =>
+            for Default_Switches ("Ada") use
+               Common_Compiler_Switches & ("-g", "-gnateE");
+      end case;
    end Compiler;
 
    package Binder is
-      for Switches ("Ada") use
-        ("-E");
+      case Build_Kind is
+         when "release" =>
+            null;
+         when "debug"      =>
+            for Default_Switches ("Ada") use ("-E");
+      end case;
    end Binder;
-   
+
 end Ada_Agnostic_IO;
