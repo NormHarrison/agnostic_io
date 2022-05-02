@@ -2,8 +2,9 @@
 
 --  NOTES --------------------------------------------------------
 --
---  4/29/2022: Notes about possible needs of socket closure were
---  replaced with actual calls to `GNAT.Sockets.Close_Socket`.
+--  5/2/2022: Notes about possible needs of socket closure were
+--  replaced with actual calls to `Self.Close`, self being an
+--  instance of `Socket_Channel_Type`.
 ------------------------------------------------------------------
 
 package body Socket_AIO is
@@ -83,8 +84,7 @@ package body Socket_AIO is
 
    exception
       when GNAT.Sockets.Socket_Error =>
-         GNAT.Sockets.Close_Socket (Self.Socket);
-         Self.Connected := False;
+         Self.Close;
          return;
 
    end Write;
@@ -192,8 +192,7 @@ package body Socket_AIO is
          --  the socket is closed from our end, we should receive
          --  a GNAT.Sockets.Socket_Error `Bad file descriptor` exception
          --  in that case.
-         Self.Connected := False;
-         GNAT.Sockets.Close_Socket (Self.Socket);
+         Self.Close;
          Error := Agnostic_IO.Remote_Socket_Closure_Error;
          return "";
 
@@ -229,7 +228,7 @@ package body Socket_AIO is
                --  but the recursion limit was reached.
 
                Error := Agnostic_IO.Recursion_Limit_Error;
-               GNAT.Sockets.Close_Socket (Self.Socket);
+               Self.Close;
                return "";
 
             else
@@ -247,8 +246,7 @@ package body Socket_AIO is
 
    exception
       when GNAT.Sockets.Socket_Error =>
-         Self.Connected := False;
-         GNAT.Sockets.Close_Socket (Self.Socket);
+         Self.Close;
          Error := Agnostic_IO.Source_Read_Error;
          return "";
 
