@@ -293,7 +293,7 @@ package body Socket_AIO is
 
    procedure Close (Self : in out Socket_Channel_Type) is
    begin
-      if not Self.Connected then
+      if Self.Connected then
          Self.Connected := False;
          GNAT.Sockets.Close_Socket (Self.Socket);
       end if;
